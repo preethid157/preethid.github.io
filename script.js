@@ -1,52 +1,83 @@
+const video = document.getElementById("animeVideo");
 const videoContainer = document.getElementById("videoContainer");
 
-if (videoContainer) {
 
-  // Cursor effect for desktop
-  if (window.matchMedia("(hover: hover) and (pointer: fine)").matches) {
+// --------------------------------------------------
+// VIDEO
+// Try the assets folder first.
+// If the video is actually in the root folder,
+// automatically try anime.mp4 instead.
+// --------------------------------------------------
 
-    videoContainer.addEventListener("mousemove", (event) => {
+const videoSources = [
+  "assets/anime.mp4",
+  "anime.mp4"
+];
 
-      const rect = videoContainer.getBoundingClientRect();
+let currentSource = 0;
 
-      const x = event.clientX - rect.left;
-      const y = event.clientY - rect.top;
+function loadVideo() {
 
-      const centerX = rect.width / 2;
-      const centerY = rect.height / 2;
-
-      const rotateY = ((x - centerX) / centerX) * 5;
-      const rotateX = ((centerY - y) / centerY) * 5;
-
-      videoContainer.style.transform =
-        `perspective(900px) rotateX(${rotateX}deg) rotateY(${rotateY}deg) scale(1.02)`;
-    });
-
-    videoContainer.addEventListener("mouseleave", () => {
-
-      videoContainer.style.transform =
-        "perspective(900px) rotateX(0deg) rotateY(0deg) scale(1)";
-
-    });
+  if (currentSource >= videoSources.length) {
+    return;
   }
+
+  video.src = videoSources[currentSource];
+
+  video.load();
+
+  video.play().catch(() => {});
+
+  currentSource++;
 }
 
+video.addEventListener("error", () => {
 
-// Make sure the video attempts to autoplay
-const video = document.querySelector("video");
+  loadVideo();
 
-if (video) {
-  video.muted = true;
+});
 
-  const playVideo = () => {
-    video.play().catch(() => {
-      // Browser may require user interaction before playback.
-    });
-  };
+loadVideo();
 
-  playVideo();
 
-  document.addEventListener("click", playVideo, {
-    once: true
+// --------------------------------------------------
+// CURSOR MOVEMENT
+// --------------------------------------------------
+
+if (
+  window.matchMedia("(hover: hover) and (pointer: fine)").matches
+) {
+
+  videoContainer.addEventListener("mousemove", (event) => {
+
+    const rect =
+      videoContainer.getBoundingClientRect();
+
+    const x =
+      event.clientX - rect.left;
+
+    const y =
+      event.clientY - rect.top;
+
+    const moveX =
+      (x / rect.width - 0.5) * 12;
+
+    const moveY =
+      (y / rect.height - 0.5) * 8;
+
+    videoContainer.style.transform =
+      `perspective(1000px)
+       rotateY(${moveX * 0.5}deg)
+       rotateX(${-moveY * 0.5}deg)
+       translate(${moveX}px, ${moveY}px)`;
   });
+
+
+  videoContainer.addEventListener("mouseleave", () => {
+
+    videoContainer.style.transform =
+      "perspective(1000px) rotateY(0deg) rotateX(0deg) translate(0,0)";
+
+  });
+
 }
