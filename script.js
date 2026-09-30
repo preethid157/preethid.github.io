@@ -1,83 +1,62 @@
-const video = document.getElementById("animeVideo");
-const videoContainer = document.getElementById("videoContainer");
+const video = document.getElementById("heroVideo");
+const fallback = document.querySelector(".video-fallback");
 
 
-// --------------------------------------------------
+// ==========================
 // VIDEO
-// Try the assets folder first.
-// If the video is actually in the root folder,
-// automatically try anime.mp4 instead.
-// --------------------------------------------------
+// ==========================
 
-const videoSources = [
-  "assets/anime.mp4",
-  "anime.mp4"
-];
+video.addEventListener("loadeddata", () => {
+    video.play().catch(() => {
+        // Browser prevented autoplay.
+        // Video remains available because it is muted.
+    });
+});
 
-let currentSource = 0;
-
-function loadVideo() {
-
-  if (currentSource >= videoSources.length) {
-    return;
-  }
-
-  video.src = videoSources[currentSource];
-
-  video.load();
-
-  video.play().catch(() => {});
-
-  currentSource++;
-}
 
 video.addEventListener("error", () => {
 
-  loadVideo();
+    console.log("Video could not be loaded.");
+
+    video.style.display = "none";
+
+    if (fallback) {
+        fallback.style.display = "flex";
+    }
 
 });
 
-loadVideo();
 
-
-// --------------------------------------------------
+// ==========================
 // CURSOR MOVEMENT
-// --------------------------------------------------
+// ==========================
 
-if (
-  window.matchMedia("(hover: hover) and (pointer: fine)").matches
-) {
+const character = document.querySelector(".character");
 
-  videoContainer.addEventListener("mousemove", (event) => {
+document.addEventListener("mousemove", (event) => {
 
-    const rect =
-      videoContainer.getBoundingClientRect();
+    if (!character) return;
 
-    const x =
-      event.clientX - rect.left;
+    const x = (event.clientX / window.innerWidth - 0.5);
+    const y = (event.clientY / window.innerHeight - 0.5);
 
-    const y =
-      event.clientY - rect.top;
+    const moveX = x * 8;
+    const moveY = y * 5;
 
-    const moveX =
-      (x / rect.width - 0.5) * 12;
+    character.style.transform =
+        `translate(${moveX}px, ${moveY}px)`;
 
-    const moveY =
-      (y / rect.height - 0.5) * 8;
-
-    videoContainer.style.transform =
-      `perspective(1000px)
-       rotateY(${moveX * 0.5}deg)
-       rotateX(${-moveY * 0.5}deg)
-       translate(${moveX}px, ${moveY}px)`;
-  });
+});
 
 
-  videoContainer.addEventListener("mouseleave", () => {
+// ==========================
+// RESET POSITION
+// ==========================
 
-    videoContainer.style.transform =
-      "perspective(1000px) rotateY(0deg) rotateX(0deg) translate(0,0)";
+document.addEventListener("mouseleave", () => {
 
-  });
+    if (character) {
+        character.style.transform = "translate(0,0)";
+    }
 
-}
+});
